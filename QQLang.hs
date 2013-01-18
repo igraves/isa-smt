@@ -19,6 +19,7 @@ import qualified X86 as X86
 lexer = P.makeTokenParser emptyDef 
 identifier = P.identifier lexer
 symbol = P.symbol lexer
+natural = P.natural lexer
 
 popcode = do
             ident <- identifier
@@ -27,7 +28,17 @@ popcode = do
                     Nothing  -> fail "Invalid opcode"
                 
 
-register = do            
+immspec = do
+            symbol "imm"
+            n <- natural
+            case (n) of
+                 8  -> return $ X86.Imm X86.B8
+                 16 -> return $ X86.Imm X86.B16
+                 32 -> return $ X86.Imm X86.B32
+                 _  -> fail "Invalid immediate width"
+
+
+regLit = do            
                     try(do r <- symbol "al" ;return $ X86.regMap r) <|>
                       try(do r <- symbol "ah" ;return $ X86.regMap r) <|>
                       try(do r <- symbol "bl" ;return $ X86.regMap r) <|>
@@ -68,4 +79,5 @@ register = do
                       try(do r <- symbol "r13" ;return $ X86.regMap r) <|>
                       try(do r <- symbol "r14" ;return $ X86.regMap r) <|>
                       try(do r <- symbol "r15" ;return $ X86.regMap r)
+
 

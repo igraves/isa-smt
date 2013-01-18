@@ -21,41 +21,6 @@ data System = System {
                         , sr15 :: SInt64
                     }
 
-data Size = B8L | B8H | B16 | B32 | B64 deriving (Show, Eq)
-
-data Register = RAX
-                | RBX
-                | RCX
-                | RDX
-                | RBP
-                | RSI
-                | RDI
-                | RSP
-                | R8
-                | R9
-                | R10
-                | R11
-                | R12
-                | R13
-                | R14
-                | R15 deriving (Show, Eq)
-
-data OpCode =   ADD 
-              | XOR 
-              | MOV 
-
-opMap x = case (map toLower x) of
-                "add" -> Just ADD
-                "xor" -> Just XOR
-                "mov" -> Just MOV
-                _     -> Nothing
-
-data OpSpec =   RegLit Register Size 
-               | Reg Size
-               | RM Size 
-               | Imm Size deriving (Show, Eq)
-
-
 mapRegLit :: Register -> (System -> SInt64)
 mapRegLit RAX = srax
 mapRegLit RBX = srbx
@@ -73,6 +38,54 @@ mapRegLit R12 = sr12
 mapRegLit R13 = sr13
 mapRegLit R14 = sr14
 mapRegLit R15 = sr15
+
+data Size = B8L | B8H | B8 | B16 | B32 | B64 deriving (Show, Eq)
+data Register = RAX
+                | RBX
+                | RCX
+                | RDX
+                | RBP
+                | RSI
+                | RDI
+                | RSP
+                | R8
+                | R9
+                | R10
+                | R11
+                | R12
+                | R13
+                | R14
+                | R15 deriving (Show, Eq)
+
+data Opcode =   ADD 
+              | XOR 
+              | MOV 
+
+opMap x = case (map toLower x) of
+                "add" -> Just ADD
+                "xor" -> Just XOR
+                "mov" -> Just MOV
+                _     -> Nothing
+
+data OpSpec =   RegLit Register Size 
+               | Reg Size
+               | RM Size 
+               | Imm Size deriving (Show, Eq)
+
+data RMDesc =  M Int
+              | R Register deriving (Show, Eq)
+
+data Operand =  I Int Size
+               | RegMem RMDesc Size deriving (Show, Eq)
+                
+
+data Operands = None
+                | OneOp Operand
+                | TwoOp Operand Operand
+                | ThreeOp Operand Operand Operand deriving (Show, Eq)
+
+data Instruction = Ins Opcode Operands
+
 
 {-
 regWrite :: Register -> System -> (SInt64 -> System)
