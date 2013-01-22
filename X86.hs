@@ -1,6 +1,8 @@
 module X86 where
 import Data.SBV
 import Data.Char
+import Data.Typeable
+import Data.Data
 
 data System = System {
                           srax :: SInt64
@@ -39,7 +41,7 @@ mapRegLit R13 = sr13
 mapRegLit R14 = sr14
 mapRegLit R15 = sr15
 
-data Size = B8L | B8H | B8 | B16 | B32 | B64 deriving (Show, Eq)
+data Size = B8L | B8H | B8 | B16 | B32 | B64 deriving (Data, Typeable, Show, Eq)
 data Register = RAX
                 | RBX
                 | RCX
@@ -55,11 +57,11 @@ data Register = RAX
                 | R12
                 | R13
                 | R14
-                | R15 deriving (Show, Eq)
+                | R15 deriving (Data, Typeable, Show, Eq)
 
 data Opcode =   ADD 
               | XOR 
-              | MOV 
+              | MOV deriving (Data, Typeable, Show, Eq)
 
 opMap x = case (map toLower x) of
                 "add" -> Just ADD
@@ -67,24 +69,33 @@ opMap x = case (map toLower x) of
                 "mov" -> Just MOV
                 _     -> Nothing
 
-data OpSpec =   RegLit Register Size 
-               | Reg Size
-               | RM Size 
-               | Imm Size deriving (Show, Eq)
+type Is8  = Bool
+type Is16 = Bool
+type Is32 = Bool
+type Is64 = Bool
+
+type Mask = (Is8,Is16,Is32,Is64)
+
+data OpSpec =    RegLit Register Size Mask
+               | Reg Mask
+               | RM Mask
+               | Imm Size Mask deriving (Data, Typeable, Show, Eq)
 
 data RMDesc =  M Int
               | R Register deriving (Show, Eq)
 
-data Operand =  I Int Size
+data Operand =  I Int Size Mask
                | RegMem RMDesc Size deriving (Show, Eq)
                 
 
-data Operands = None
-                | OneOp Operand
-                | TwoOp Operand Operand
-                | ThreeOp Operand Operand Operand deriving (Show, Eq)
+data Operands a = None
+                | OneOp a
+                | TwoOp a a
+                | ThreeOp a a a deriving (Typeable, Data, Show, Eq)
 
-data Instruction = Ins Opcode Operands
+
+data InsSpec = InsSpec Opcode (Operands OpSpec) deriving (Typeable, Data, Show, Eq)
+data Ins = Ins Opcode (Operands Operand) deriving (Show, Eq)
 
 
 {-
