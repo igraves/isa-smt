@@ -140,7 +140,9 @@ parsePat (file, line, col) s =
             return e
 
 compSpecPat :: X86.InsSpec -> Maybe (TH.Q TH.Pat)
-compSpecPat (X86.InsSpec X86.ADD X86.None) = Just $ TH.conP (TH.mkName "ADD") [TH.varP (TH.mkName "None")]
+compSpecPat (X86.InsSpec x@X86.ADD X86.None) = Just $ TH.conP 
+                                                            (TH.mkName "ADD") 
+                                                            [TH.varP (TH.mkName "None")]
 
 compSpecExpr :: X86.InsSpec -> Maybe (TH.Q TH.Exp)
 compSpecExpr (X86.InsSpec X86.ADD X86.None) = Just $ TH.appE (TH.appE (TH.conE (TH.mkName "X86.Ins"))
