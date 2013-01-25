@@ -1,8 +1,10 @@
 module X86 where
 import Data.SBV
-import Data.Char
-import Data.Typeable
 import Data.Data
+import Data.Typeable
+import Data.Char
+import qualified Language.Haskell.TH.Syntax as THS
+import qualified Language.Haskell.TH as TH
 
 data System = System {
                           srax :: SInt64
@@ -59,9 +61,34 @@ data Register = RAX
                 | R14
                 | R15 deriving (Data, Typeable, Show, Eq)
 
+instance THS.Lift Register where
+          lift RAX = [|RAX|]
+          lift RBX = [|RBX|]
+          lift RCX = [|RCX|]
+          lift RDX = [|RDX|]
+          lift RBP = [|RBP|]
+          lift RSI = [|RSI|]
+          lift RDI = [|RDI|]
+          lift RSP = [|RSP|]
+          lift R8  = [|R8 |]
+          lift R9  = [|R9 |]
+          lift R10 = [|R10|]
+          lift R11 = [|R11|]
+          lift R12 = [|R12|]
+          lift R13 = [|R13|]
+          lift R14 = [|R14|]
+          lift R15 = [|R15|]
+
+
+
 data Opcode =   ADD 
               | XOR 
               | MOV deriving (Data, Typeable, Show, Eq)
+
+instance THS.Lift Opcode where
+          lift ADD = [|ADD|]
+          lift XOR = [|XOR|]
+          lift MOV = [|MOV|]
 
 opMap x = case (map toLower x) of
                 "add" -> Just ADD
@@ -82,10 +109,10 @@ data OpSpec =    RegLit Register Size Mask
                | Imm Size Mask deriving (Data, Typeable, Show, Eq)
 
 data RMDesc =  M Int
-              | R Register deriving (Show, Eq)
+              | R Register deriving (Data, Typeable, Show, Eq)
 
 data Operand =  I Int Size Mask
-               | RegMem RMDesc Size deriving (Show, Eq)
+               | RegMem RMDesc Size Mask deriving (Data, Typeable, Show, Eq)
                 
 
 data Operands a = None
@@ -170,48 +197,97 @@ regMap x = case (map toLower x) of
                     "r14" ->  r14
                     "r15" ->  r15
 
+bit8 = (True,False,False,False)
+bit16 = (False,True,False,False)
+bit32 = (False,False,True,False)
+bit64 = (False,False,False,True)
 
+al = (RegLit RAX B8L) bit8
+ah = (RegLit RAX B8H) bit8
+bl = (RegLit RBX B8L) bit8
+bh = (RegLit RBX B8H) bit8
+cl = (RegLit RCX B8L) bit8
+ch = (RegLit RCX B8H) bit8
+dl = (RegLit RDX B8L) bit8
+dh = (RegLit RDX B8H) bit8
 
-al = (RegLit RAX B8L)
-ah = (RegLit RAX B8H)
-bl = (RegLit RBX B8L)
-bh = (RegLit RBX B8H)
-cl = (RegLit RCX B8L)
-ch = (RegLit RCX B8H)
-dl = (RegLit RDX B8L)
-dh = (RegLit RDX B8H)
+ax = (RegLit RAX B16) bit16
+bx = (RegLit RBX B16) bit16
+cx = (RegLit RCX B16) bit16
+dx = (RegLit RDX B16) bit16
+bp = (RegLit RBP B16) bit16
+si = (RegLit RSI B16) bit16
+di = (RegLit RDI B16) bit16
+sp = (RegLit RSP B16) bit16
 
-ax = (RegLit RAX B16)
-bx = (RegLit RBX B16)
-cx = (RegLit RCX B16)
-dx = (RegLit RDX B16)
-bp = (RegLit RBP B16)
-si = (RegLit RSI B16)
-di = (RegLit RDI B16)
-sp = (RegLit RSP B16)
+eax = (RegLit RAX B32) bit32
+ebx = (RegLit RBX B32) bit32
+ecx = (RegLit RCX B32) bit32
+edx = (RegLit RDX B32) bit32
+ebp = (RegLit RBP B32) bit32
+esi = (RegLit RSI B32) bit32
+edi = (RegLit RDI B32) bit32
+esp = (RegLit RSP B32) bit32
 
-eax = (RegLit RAX B32)
-ebx = (RegLit RBX B32)
-ecx = (RegLit RCX B32)
-edx = (RegLit RDX B32)
-ebp = (RegLit RBP B32)
-esi = (RegLit RSI B32)
-edi = (RegLit RDI B32)
-esp = (RegLit RSP B32)
+rax = (RegLit RAX B64) bit64
+rbx = (RegLit RBX B64) bit64
+rcx = (RegLit RCX B64) bit64
+rdx = (RegLit RDX B64) bit64
+rbp = (RegLit RBP B64) bit64
+rsi = (RegLit RSI B64) bit64
+rdi = (RegLit RDI B64) bit64
+rsp = (RegLit RSP B64) bit64
+r8  = (RegLit R8  B64) bit64
+r9  = (RegLit R9  B64) bit64
+r10 = (RegLit R10 B64) bit64
+r11 = (RegLit R11 B64) bit64
+r12 = (RegLit R12 B64) bit64
+r13 = (RegLit R13 B64) bit64
+r14 = (RegLit R14 B64) bit64
+r15 = (RegLit R15 B64) bit64
 
-rax = (RegLit RAX B64)
-rbx = (RegLit RBX B64)
-rcx = (RegLit RCX B64)
-rdx = (RegLit RDX B64)
-rbp = (RegLit RBP B64)
-rsi = (RegLit RSI B64)
-rdi = (RegLit RDI B64)
-rsp = (RegLit RSP B64)
-r8  = (RegLit R8 B64)
-r9  = (RegLit R9 B64)
-r10 = (RegLit R10 B64)
-r11 = (RegLit R11 B64)
-r12 = (RegLit R12 B64)
-r13 = (RegLit R13 B64)
-r14 = (RegLit R14 B64)
-r15 = (RegLit R15 B64)
+--Crappy, but deriving is probably harder at this point
+
+pal = [p|(RegLit RAX B8L (True,False,False,False))|]
+pah = [p|(RegLit RAX B8H (True,False,False,False))|]
+pbl = [p|(RegLit RBX B8L (True,False,False,False))|]
+pbh = [p|(RegLit RBX B8H (True,False,False,False))|]
+pcl = [p|(RegLit RCX B8L (True,False,False,False))|]
+pch = [p|(RegLit RCX B8H (True,False,False,False))|]
+pdl = [p|(RegLit RDX B8L (True,False,False,False))|]
+pdh = [p|(RegLit RDX B8H (True,False,False,False))|]
+
+pax = [p|(RegLit RAX B16 (False,True,False,False))|]
+pbx = [p|(RegLit RBX B16 (False,True,False,False))|]
+pcx = [p|(RegLit RCX B16 (False,True,False,False))|]
+pdx = [p|(RegLit RDX B16 (False,True,False,False))|]
+pbp = [p|(RegLit RBP B16 (False,True,False,False))|]
+psi = [p|(RegLit RSI B16 (False,True,False,False))|]
+pdi = [p|(RegLit RDI B16 (False,True,False,False))|]
+psp = [p|(RegLit RSP B16 (False,True,False,False))|]
+
+peax = [p|(RegLit RAX B32 (False,False,True,False))|]
+pebx = [p|(RegLit RBX B32 (False,False,True,False))|]
+pecx = [p|(RegLit RCX B32 (False,False,True,False))|]
+pedx = [p|(RegLit RDX B32 (False,False,True,False))|]
+pebp = [p|(RegLit RBP B32 (False,False,True,False))|]
+pesi = [p|(RegLit RSI B32 (False,False,True,False))|]
+pedi = [p|(RegLit RDI B32 (False,False,True,False))|]
+pesp = [p|(RegLit RSP B32 (False,False,True,False))|]
+
+prax = [p|(RegLit RAX B64 (False,False,False,True))|]
+prbx = [p|(RegLit RBX B64 (False,False,False,True))|]
+prcx = [p|(RegLit RCX B64 (False,False,False,True))|]
+prdx = [p|(RegLit RDX B64 (False,False,False,True))|]
+prbp = [p|(RegLit RBP B64 (False,False,False,True))|]
+prsi = [p|(RegLit RSI B64 (False,False,False,True))|]
+prdi = [p|(RegLit RDI B64 (False,False,False,True))|]
+prsp = [p|(RegLit RSP B64 (False,False,False,True))|]
+pr8  = [p|(RegLit R8  B64 (False,False,False,True))|]
+pr9  = [p|(RegLit R9  B64 (False,False,False,True))|]
+pr10 = [p|(RegLit R10 B64 (False,False,False,True))|]
+pr11 = [p|(RegLit R11 B64 (False,False,False,True))|]
+pr12 = [p|(RegLit R12 B64 (False,False,False,True))|]
+pr13 = [p|(RegLit R13 B64 (False,False,False,True))|]
+pr14 = [p|(RegLit R14 B64 (False,False,False,True))|]
+pr15 = [p|(RegLit R15 B64 (False,False,False,True))|]

@@ -73,52 +73,48 @@ immspec = do
                  32 -> return $ X86.Imm X86.B32 (False, False, True, False)
                  _  -> fail "Invalid immediate width"
 
-bit8  = (True,False,False,False)
-bit16 = (False,True,False,False)
-bit32 = (False,False,True,False)
-bit64 = (False,False,False,True)
 
 reglit = do            
-                    try(do r <- symbol "al" ;return $ X86.regMap r bit8) <|>
-                      try(do r <- symbol "ah" ;return $ X86.regMap r bit8) <|>
-                      try(do r <- symbol "bl" ;return $ X86.regMap r bit8) <|>
-                      try(do r <- symbol "bh" ;return $ X86.regMap r bit8) <|>
-                      try(do r <- symbol "cl" ;return $ X86.regMap r bit8) <|>
-                      try(do r <- symbol "ch" ;return $ X86.regMap r bit8) <|>
-                      try(do r <- symbol "dl" ;return $ X86.regMap r bit8) <|>
-                      try(do r <- symbol "dh" ;return $ X86.regMap r bit8) <|>
-                      try(do r <- symbol "ax" ;return $ X86.regMap r bit16) <|>
-                      try(do r <- symbol "bx" ;return $ X86.regMap r bit16) <|>
-                      try(do r <- symbol "cx" ;return $ X86.regMap r bit16) <|>
-                      try(do r <- symbol "dx" ;return $ X86.regMap r bit16) <|>
-                      try(do r <- symbol "bp" ;return $ X86.regMap r bit16) <|>
-                      try(do r <- symbol "si" ;return $ X86.regMap r bit16) <|>
-                      try(do r <- symbol "di" ;return $ X86.regMap r bit16) <|>
-                      try(do r <- symbol "sp" ;return $ X86.regMap r bit16) <|>
-                      try(do r <- symbol "eax" ;return $ X86.regMap r bit32) <|>
-                      try(do r <- symbol "ebx" ;return $ X86.regMap r bit32) <|>
-                      try(do r <- symbol "ecx" ;return $ X86.regMap r bit32) <|>
-                      try(do r <- symbol "edx" ;return $ X86.regMap r bit32) <|>
-                      try(do r <- symbol "ebp" ;return $ X86.regMap r bit32) <|>
-                      try(do r <- symbol "esi" ;return $ X86.regMap r bit32) <|>
-                      try(do r <- symbol "edi" ;return $ X86.regMap r bit32) <|>
-                      try(do r <- symbol "esp" ;return $ X86.regMap r bit32) <|>
-                      try(do r <- symbol "rax" ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "rbx" ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "rcx" ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "rdx" ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "rbp" ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "rsi" ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "rdi" ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "rsp" ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "r8"  ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "r9"  ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "r10" ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "r11" ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "r12" ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "r13" ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "r14" ;return $ X86.regMap r bit64) <|>
-                      try(do r <- symbol "r15" ;return $ X86.regMap r bit64)
+                    try(do r <- symbol "al" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "ah" ;return $ X86.regMap r)  <|>
+                      try(do r <- symbol "bl" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "bh" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "cl" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "ch" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "dl" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "dh" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "ax" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "bx" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "cx" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "dx" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "bp" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "si" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "di" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "sp" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "eax" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "ebx" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "ecx" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "edx" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "ebp" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "esi" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "edi" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "esp" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "rax" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "rbx" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "rcx" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "rdx" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "rbp" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "rsi" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "rdi" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "rsp" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "r8"  ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "r9"  ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "r10" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "r11" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "r12" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "r13" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "r14" ;return $ X86.regMap r) <|>
+                      try(do r <- symbol "r15" ;return $ X86.regMap r)
 
 
 --See: http://www.haskell.org/haskellwiki/Quasiquotation, right above #3
@@ -139,15 +135,76 @@ parsePat (file, line, col) s =
             eof
             return e
 
+
+toPatQ x = [p| x |] 
+toExpQ x = [| x |]
+
+--Compiling Spec Patterns to a corresponding haskell pattern on Regular Instructions
+
+boolCon True  = TH.wildP 
+boolCon False = toPatQ False
+
+bit8  = TH.tupP [TH.wildP, [p|False|], [p|False|], [p|False|]]
+bit16 = TH.tupP [[p|False|], TH.wildP, [p|False|], [p|False|]]
+bit32 = TH.tupP [[p|False|], [p|False|], TH.wildP, [p|False|]]
+bit64 = TH.tupP [[p|False|], [p|False|], [p|False|], TH.wildP]
+
+cosp (X86.RegLit X86.RAX X86.B8L _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RAX|]]), [p|X86.B8L|], bit8]
+cosp (X86.RegLit X86.RAX X86.B8H _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RAX|]]), [p|X86.B8H|], bit8]
+cosp (X86.RegLit X86.RBX X86.B8L _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBX|]]), [p|X86.B8L|], bit8]
+cosp (X86.RegLit X86.RBX X86.B8H _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBX|]]), [p|X86.B8H|], bit8]
+cosp (X86.RegLit X86.RCX X86.B8L _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RCX|]]), [p|X86.B8L|], bit8]
+cosp (X86.RegLit X86.RCX X86.B8H _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RCX|]]), [p|X86.B8H|], bit8]
+cosp (X86.RegLit X86.RDX X86.B8L _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDX|]]), [p|X86.B8L|], bit8]
+cosp (X86.RegLit X86.RDX X86.B8H _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDX|]]), [p|X86.B8H|], bit8]
+cosp (X86.RegLit X86.RAX X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RAX|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RBX X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBX|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RCX X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RCX|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RDX X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDX|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RBP X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBP|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RSI X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RSI|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RDI X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDI|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RSP X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RSP|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RAX X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RAX|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RBX X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBX|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RCX X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RCX|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RDX X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDX|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RBP X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBP|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RSI X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RSI|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RDI X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDI|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RSP X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RSP|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RAX X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RAX|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RBX X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBX|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RCX X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RCX|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RDX X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDX|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RBP X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBP|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RSI X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RSI|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RDI X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDI|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RSP X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RSP|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R8  X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R8 |]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R9  X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R9 |]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R10 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R10|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R11 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R11|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R12 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R12|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R13 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R13|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R14 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R14|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R15 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R15|]]), [p|X86.B64|], bit64]
+
 compSpecPat :: X86.InsSpec -> Maybe (TH.Q TH.Pat)
 compSpecPat (X86.InsSpec x@X86.ADD X86.None) = Just $ TH.conP 
-                                                            (TH.mkName "ADD") 
-                                                            [TH.varP (TH.mkName "None")]
+                                                            (TH.mkName "X86.Ins") 
+                                                            [
+                                                              toPatQ x,
+                                                              toPatQ "X86.None"
+                                                            ]
+
+
+
 
 compSpecExpr :: X86.InsSpec -> Maybe (TH.Q TH.Exp)
-compSpecExpr (X86.InsSpec X86.ADD X86.None) = Just $ TH.appE (TH.appE (TH.conE (TH.mkName "X86.Ins"))
-                                                             (TH.conE (TH.mkName "X86.ADD")))
-                                                             (TH.conE (TH.mkName "X86.None"))
+compSpecExpr (X86.InsSpec x X86.None) = Just $ TH.appE (TH.appE (TH.conE (TH.mkName "X86.Ins"))
+                                                                (toExpQ x))
+                                                       (TH.conE (TH.mkName "X86.None"))
 
 
 quoteSpecPat :: String -> TH.PatQ
