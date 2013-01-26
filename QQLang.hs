@@ -1,4 +1,4 @@
---ghci QQLang.hs -XDeriveDataTypeable -XQuasiQuotes -XTemplateHaskell
+--ghci QQLang.hs -XDeriveDataTypeable -XQuasiQuotes -XTemplateHaskell -XFlexibleInstances
 module QQLang where
 import Text.Parsec
 import qualified Text.Parsec.Token as P
@@ -294,7 +294,7 @@ compSpecExpr (X86.InsSpec oc ops)     = Just $ TH.appsE
                                                     [
                                                         TH.conE $ TH.mkName "X86.Ins"
                                                       , toExpQ oc 
-                                                      , cose ops
+                                                      --, cose ops
                                                     ]
                                               
 
