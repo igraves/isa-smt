@@ -1,4 +1,4 @@
---ghci QQLang.hs -XDeriveDataTypeable -XQuasiQuotes
+--ghci QQLang.hs -XDeriveDataTypeable -XQuasiQuotes -XTemplateHaskell
 module QQLang where
 import Text.Parsec
 import qualified Text.Parsec.Token as P
@@ -68,9 +68,9 @@ immspec = do
             symbol "imm"
             n <- natural
             case (n) of
-                 8  -> return $ X86.Imm X86.B8 (True, False, False, False)
-                 16 -> return $ X86.Imm X86.B16 (False, True, False, False)
-                 32 -> return $ X86.Imm X86.B32 (False, False, True, False)
+                 8  -> return $ X86.Imm (True, False, False, False)
+                 16 -> return $ X86.Imm (False, True, False, False)
+                 32 -> return $ X86.Imm (False, False, True, False)
                  _  -> fail "Invalid immediate width"
 
 
@@ -149,54 +149,139 @@ bit16 = TH.tupP [[p|False|], TH.wildP, [p|False|], [p|False|]]
 bit32 = TH.tupP [[p|False|], [p|False|], TH.wildP, [p|False|]]
 bit64 = TH.tupP [[p|False|], [p|False|], [p|False|], TH.wildP]
 
-cosp (X86.RegLit X86.RAX X86.B8L _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RAX|]]), [p|X86.B8L|], bit8]
-cosp (X86.RegLit X86.RAX X86.B8H _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RAX|]]), [p|X86.B8H|], bit8]
-cosp (X86.RegLit X86.RBX X86.B8L _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBX|]]), [p|X86.B8L|], bit8]
-cosp (X86.RegLit X86.RBX X86.B8H _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBX|]]), [p|X86.B8H|], bit8]
-cosp (X86.RegLit X86.RCX X86.B8L _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RCX|]]), [p|X86.B8L|], bit8]
-cosp (X86.RegLit X86.RCX X86.B8H _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RCX|]]), [p|X86.B8H|], bit8]
-cosp (X86.RegLit X86.RDX X86.B8L _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDX|]]), [p|X86.B8L|], bit8]
-cosp (X86.RegLit X86.RDX X86.B8H _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDX|]]), [p|X86.B8H|], bit8]
-cosp (X86.RegLit X86.RAX X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RAX|]]), [p|X86.B16|], bit16]
-cosp (X86.RegLit X86.RBX X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBX|]]), [p|X86.B16|], bit16]
-cosp (X86.RegLit X86.RCX X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RCX|]]), [p|X86.B16|], bit16]
-cosp (X86.RegLit X86.RDX X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDX|]]), [p|X86.B16|], bit16]
-cosp (X86.RegLit X86.RBP X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBP|]]), [p|X86.B16|], bit16]
-cosp (X86.RegLit X86.RSI X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RSI|]]), [p|X86.B16|], bit16]
-cosp (X86.RegLit X86.RDI X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDI|]]), [p|X86.B16|], bit16]
-cosp (X86.RegLit X86.RSP X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RSP|]]), [p|X86.B16|], bit16]
-cosp (X86.RegLit X86.RAX X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RAX|]]), [p|X86.B32|], bit32]
-cosp (X86.RegLit X86.RBX X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBX|]]), [p|X86.B32|], bit32]
-cosp (X86.RegLit X86.RCX X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RCX|]]), [p|X86.B32|], bit32]
-cosp (X86.RegLit X86.RDX X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDX|]]), [p|X86.B32|], bit32]
-cosp (X86.RegLit X86.RBP X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBP|]]), [p|X86.B32|], bit32]
-cosp (X86.RegLit X86.RSI X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RSI|]]), [p|X86.B32|], bit32]
-cosp (X86.RegLit X86.RDI X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDI|]]), [p|X86.B32|], bit32]
-cosp (X86.RegLit X86.RSP X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RSP|]]), [p|X86.B32|], bit32]
-cosp (X86.RegLit X86.RAX X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RAX|]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.RBX X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBX|]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.RCX X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RCX|]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.RDX X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDX|]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.RBP X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RBP|]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.RSI X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RSI|]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.RDI X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RDI|]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.RSP X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.RSP|]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.R8  X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R8 |]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.R9  X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R9 |]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.R10 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R10|]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.R11 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R11|]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.R12 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R12|]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.R13 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R13|]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.R14 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R14|]]), [p|X86.B64|], bit64]
-cosp (X86.RegLit X86.R15 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "R") [[p|X86.R15|]]), [p|X86.B64|], bit64]
+maskx (a,b,c,d) = TH.tupP [flip a, flip b, flip c, flip d]
+    where
+      flip False = [p|False|]
+      flip True  = TH.wildP
+
+cose (X86.RegLit X86.RAX X86.B8L m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RAX|]], [|X86.B8L|], [|m|]]
+cose (X86.RegLit X86.RAX X86.B8H m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RAX|]], [|X86.B8H|], [|m|]]
+cose (X86.RegLit X86.RBX X86.B8L m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RBX|]], [|X86.B8L|], [|m|]]
+cose (X86.RegLit X86.RBX X86.B8H m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RBX|]], [|X86.B8H|], [|m|]]
+cose (X86.RegLit X86.RCX X86.B8L m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RCX|]], [|X86.B8L|], [|m|]]
+cose (X86.RegLit X86.RCX X86.B8H m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RCX|]], [|X86.B8H|], [|m|]]
+cose (X86.RegLit X86.RDX X86.B8L m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RDX|]], [|X86.B8L|], [|m|]]
+cose (X86.RegLit X86.RDX X86.B8H m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RDX|]], [|X86.B8H|], [|m|]]
+cose (X86.RegLit X86.RAX X86.B16 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RAX|]], [|X86.B16|], [|m|]]
+cose (X86.RegLit X86.RBX X86.B16 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RBX|]], [|X86.B16|], [|m|]]
+cose (X86.RegLit X86.RCX X86.B16 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RCX|]], [|X86.B16|], [|m|]]
+cose (X86.RegLit X86.RDX X86.B16 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RDX|]], [|X86.B16|], [|m|]]
+cose (X86.RegLit X86.RBP X86.B16 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RBP|]], [|X86.B16|], [|m|]]
+cose (X86.RegLit X86.RSI X86.B16 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RSI|]], [|X86.B16|], [|m|]]
+cose (X86.RegLit X86.RDI X86.B16 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RDI|]], [|X86.B16|], [|m|]]
+cose (X86.RegLit X86.RSP X86.B16 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RSP|]], [|X86.B16|], [|m|]]
+cose (X86.RegLit X86.RAX X86.B32 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RAX|]], [|X86.B32|], [|m|]]
+cose (X86.RegLit X86.RBX X86.B32 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RBX|]], [|X86.B32|], [|m|]]
+cose (X86.RegLit X86.RCX X86.B32 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RCX|]], [|X86.B32|], [|m|]]
+cose (X86.RegLit X86.RDX X86.B32 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RDX|]], [|X86.B32|], [|m|]]
+cose (X86.RegLit X86.RBP X86.B32 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RBP|]], [|X86.B32|], [|m|]]
+cose (X86.RegLit X86.RSI X86.B32 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RSI|]], [|X86.B32|], [|m|]]
+cose (X86.RegLit X86.RDI X86.B32 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RDI|]], [|X86.B32|], [|m|]]
+cose (X86.RegLit X86.RSP X86.B32 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RSP|]], [|X86.B32|], [|m|]]
+cose (X86.RegLit X86.RAX X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RAX|]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.RBX X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RBX|]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.RCX X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RCX|]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.RDX X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RDX|]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.RBP X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RBP|]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.RSI X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RSI|]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.RDI X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RDI|]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.RSP X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.RSP|]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.R8  X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.R8 |]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.R9  X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.R9 |]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.R10 X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.R10|]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.R11 X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.R11|]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.R12 X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.R12|]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.R13 X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.R13|]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.R14 X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.R14|]], [|X86.B64|], [|m|]]
+cose (X86.RegLit X86.R15 X86.B64 m) = TH.appsE [TH.conE (TH.mkName "X86.RegMem"), TH.appsE [TH.conE (TH.mkName "X86.R"), [|X86.R15|]], [|X86.B64|], [|m|]]
+
+
+--cosp: RegLits
+cosp (X86.RegLit X86.RAX X86.B8L _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RAX|]]), [p|X86.B8L|], bit8]
+cosp (X86.RegLit X86.RAX X86.B8H _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RAX|]]), [p|X86.B8H|], bit8]
+cosp (X86.RegLit X86.RBX X86.B8L _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RBX|]]), [p|X86.B8L|], bit8]
+cosp (X86.RegLit X86.RBX X86.B8H _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RBX|]]), [p|X86.B8H|], bit8]
+cosp (X86.RegLit X86.RCX X86.B8L _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RCX|]]), [p|X86.B8L|], bit8]
+cosp (X86.RegLit X86.RCX X86.B8H _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RCX|]]), [p|X86.B8H|], bit8]
+cosp (X86.RegLit X86.RDX X86.B8L _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RDX|]]), [p|X86.B8L|], bit8]
+cosp (X86.RegLit X86.RDX X86.B8H _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RDX|]]), [p|X86.B8H|], bit8]
+cosp (X86.RegLit X86.RAX X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RAX|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RBX X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RBX|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RCX X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RCX|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RDX X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RDX|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RBP X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RBP|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RSI X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RSI|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RDI X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RDI|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RSP X86.B16 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RSP|]]), [p|X86.B16|], bit16]
+cosp (X86.RegLit X86.RAX X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RAX|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RBX X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RBX|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RCX X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RCX|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RDX X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RDX|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RBP X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RBP|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RSI X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RSI|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RDI X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RDI|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RSP X86.B32 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RSP|]]), [p|X86.B32|], bit32]
+cosp (X86.RegLit X86.RAX X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RAX|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RBX X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RBX|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RCX X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RCX|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RDX X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RDX|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RBP X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RBP|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RSI X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RSI|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RDI X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RDI|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.RSP X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.RSP|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R8  X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.R8 |]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R9  X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.R9 |]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R10 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.R10|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R11 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.R11|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R12 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.R12|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R13 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.R13|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R14 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.R14|]]), [p|X86.B64|], bit64]
+cosp (X86.RegLit X86.R15 X86.B64 _) = TH.conP (TH.mkName "X86.RegMem") [(TH.conP (TH.mkName "X86.R") [[p|X86.R15|]]), [p|X86.B64|], bit64]
+--cosp Registers
+cosp (X86.Reg m) = TH.conP (TH.mkName "X86.RegMem")
+                           [
+                             TH.conP (TH.mkName "X86.R") [(TH.wildP)],
+                             TH.varP (TH.mkName "s"),
+                             maskx m
+                           ]
+--cosp Registers/Memory
+cosp (X86.RM m) = TH.conP (TH.mkName "X86.RegMem")
+                          [
+                            TH.varP (TH.mkName "rm"),
+                            TH.varP (TH.mkName "s"),
+                            maskx m 
+                          ]
+
+cosp (X86.Imm m) = TH.conP (TH.mkName "X86.I")
+                             [
+                              TH.varP (TH.mkName "addr"),
+                              maskx m
+                             ]
+
+cosps X86.None = TH.conP (TH.mkName "X86.None") []
+cosps (X86.OneOp x) = TH.conP (TH.mkName "X86.OneOp")
+                              [
+                                cosp x
+                              ]
+cosps (X86.TwoOp x y) = TH.conP (TH.mkName "X86.TwoOp")
+                                [
+                                  cosp x,
+                                  cosp y
+                                ]
+cosps (X86.ThreeOp x y z) = TH.conP (TH.mkName "X86.ThreeOp")
+                                  [
+                                    cosp x,
+                                    cosp y,
+                                    cosp z
+                                  ]
 
 compSpecPat :: X86.InsSpec -> Maybe (TH.Q TH.Pat)
-compSpecPat (X86.InsSpec x@X86.ADD X86.None) = Just $ TH.conP 
-                                                            (TH.mkName "X86.Ins") 
-                                                            [
-                                                              toPatQ x,
-                                                              toPatQ "X86.None"
-                                                            ]
+compSpecPat (X86.InsSpec oc ops) = Just $ do 
+                                              TH.conP (TH.mkName "X86.Ins") $
+                                                      [
+                                                        (X86.liftp oc),
+                                                        cosps ops
+                                                      ] 
 
 
 
@@ -205,6 +290,13 @@ compSpecExpr :: X86.InsSpec -> Maybe (TH.Q TH.Exp)
 compSpecExpr (X86.InsSpec x X86.None) = Just $ TH.appE (TH.appE (TH.conE (TH.mkName "X86.Ins"))
                                                                 (toExpQ x))
                                                        (TH.conE (TH.mkName "X86.None"))
+compSpecExpr (X86.InsSpec oc ops)     = Just $ TH.appsE 
+                                                    [
+                                                        TH.conE $ TH.mkName "X86.Ins"
+                                                      , toExpQ oc 
+                                                      , cose ops
+                                                    ]
+                                              
 
 
 quoteSpecPat :: String -> TH.PatQ
