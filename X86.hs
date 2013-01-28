@@ -44,6 +44,15 @@ mapRegLit R14 = sr14
 mapRegLit R15 = sr15
 
 data Size = B8L | B8H | B8 | B16 | B32 | B64 deriving (Data, Typeable, Show, Eq)
+
+instance THS.Lift Size where
+        lift B8L = [|B8L|]
+        lift B8H = [|B8H|]
+        lift B8  = [|B8|]
+        lift B16 = [|B16|]
+        lift B32 = [|B32|]
+        lift B64 = [|B64|]
+
 data Register = RAX
                 | RBX
                 | RCX
@@ -90,6 +99,56 @@ instance THS.Lift Opcode where
           lift XOR = [|XOR|]
           lift MOV = [|MOV|]
 
+
+liftp ADD = [p|ADD|]
+liftp XOR = [p|XOR|]
+liftp MOV = [p|MOV|]
+
+instance THS.Lift OpSpec where
+          lift (RegLit r s m) = TH.appsE $
+                                    [
+                                      TH.conE $ TH.mkName "X86.RegLit",
+                                      [|r|],
+                                      [|s|],
+                                      [|m|]
+                                    ]
+          lift (Reg m) = TH.appsE $
+                              [
+                                TH.conE $ TH.mkName "X86.Reg",
+                                [|m|]
+                              ]
+          lift (RM m)  = TH.appsE $
+                              [
+                                TH.conE $ TH.mkName "X86.RM",
+                                [|m|]
+                              ]
+          lift (Imm m) = TH.appsE $
+                              [
+                                TH.conE $ TH.mkName "X86.Imm",
+                                [|m|]
+                              ]
+
+instance THS.Lift (Operands OpSpec) where
+          lift None = TH.conE $ TH.mkName "X86.None"
+          lift (OneOp x) = TH.appsE $ 
+                              [
+                                TH.conE $ TH.mkName "X86.OneOp",
+                                [|x|]
+                              ]
+          lift (TwoOp x y) = TH.appsE $
+                              [
+                                TH.conE $ TH.mkName "X86.TwoOp",
+                                [|x|],
+                                [|y|]
+                              ]
+          lift (ThreeOp x y z) = TH.appsE $
+                              [
+                                TH.conE $ TH.mkName "X86.ThreeOp",
+                                [|x|],
+                                [|y|],
+                                [|z|]
+                              ]
+                        
 opMap x = case (map toLower x) of
                 "add" -> Just ADD
                 "xor" -> Just XOR
@@ -106,7 +165,7 @@ type Mask = (Is8,Is16,Is32,Is64)
 data OpSpec =    RegLit Register Size Mask
                | Reg Mask
                | RM Mask
-               | Imm Size Mask deriving (Data, Typeable, Show, Eq)
+               | Imm Mask deriving (Data, Typeable, Show, Eq)
 
 data RMDesc =  M Int
               | R Register deriving (Data, Typeable, Show, Eq)
