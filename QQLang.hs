@@ -1,4 +1,4 @@
---ghci QQLang.hs -XDeriveDataTypeable -XQuasiQuotes
+--ghci QQLang.hs -XDeriveDataTypeable -XQuasiQuotes -XTemplateHaskell
 module QQLang where
 import Text.Parsec
 import qualified Text.Parsec.Token as P
