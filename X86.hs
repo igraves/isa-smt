@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable, QuasiQuotes, TemplateHaskell, FlexibleInstances #-}
 module X86 where
 import Data.SBV
 import Data.Data
@@ -105,24 +106,24 @@ liftp XOR = [p|XOR|]
 liftp MOV = [p|MOV|]
 
 instance THS.Lift OpSpec where
-          lift (RegLit r s m) = TH.appsE $
+          lift (RegLit r s m _) = TH.appsE $
                                     [
                                       TH.conE $ TH.mkName "X86.RegLit",
                                       [|r|],
                                       [|s|],
                                       [|m|]
                                     ]
-          lift (Reg m) = TH.appsE $
+          lift (Reg m _) = TH.appsE $
                               [
                                 TH.conE $ TH.mkName "X86.Reg",
                                 [|m|]
                               ]
-          lift (RM m)  = TH.appsE $
+          lift (RM m _)  = TH.appsE $
                               [
                                 TH.conE $ TH.mkName "X86.RM",
                                 [|m|]
                               ]
-          lift (Imm m) = TH.appsE $
+          lift (Imm m _) = TH.appsE $
                               [
                                 TH.conE $ TH.mkName "X86.Imm",
                                 [|m|]
@@ -161,11 +162,12 @@ type Is32 = Bool
 type Is64 = Bool
 
 type Mask = (Is8,Is16,Is32,Is64)
+type Label = String
 
-data OpSpec =    RegLit Register Size Mask
-               | Reg Mask
-               | RM Mask
-               | Imm Mask deriving (Data, Typeable, Show, Eq)
+data OpSpec =    RegLit Register Size Mask (Maybe Label)
+               | Reg Mask (Maybe Label)
+               | RM Mask (Maybe Label)
+               | Imm Mask (Maybe Label) deriving (Data, Typeable, Show, Eq)
 
 data RMDesc =  M Int
               | R Register deriving (Data, Typeable, Show, Eq)
@@ -181,7 +183,8 @@ data Operands a = None
 
 
 data InsSpec = InsSpec Opcode (Operands OpSpec) deriving (Typeable, Data, Show, Eq)
-data Ins = Ins Opcode (Operands Operand) deriving (Show, Eq)
+data Ins = Ins Opcode (Operands Operand) deriving (Data, Typeable, Show, Eq)
+
 
 
 {-
@@ -306,7 +309,7 @@ r14 = (RegLit R14 B64) bit64
 r15 = (RegLit R15 B64) bit64
 
 --Crappy, but deriving is probably harder at this point
-
+{-
 pal = [p|(RegLit RAX B8L (True,False,False,False))|]
 pah = [p|(RegLit RAX B8H (True,False,False,False))|]
 pbl = [p|(RegLit RBX B8L (True,False,False,False))|]
@@ -350,3 +353,4 @@ pr12 = [p|(RegLit R12 B64 (False,False,False,True))|]
 pr13 = [p|(RegLit R13 B64 (False,False,False,True))|]
 pr14 = [p|(RegLit R14 B64 (False,False,False,True))|]
 pr15 = [p|(RegLit R15 B64 (False,False,False,True))|]
+-}
