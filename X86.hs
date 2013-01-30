@@ -26,7 +26,7 @@ data System = System {
                         , sr15 :: SInt64
                     }
 
-mapRegLit :: Register -> (System -> SInt64)
+mapRegLit :: Register -> (System -> Symbolic SInt64)
 mapRegLit RAX = srax
 mapRegLit RBX = srbx
 mapRegLit RCX = srcx
@@ -43,6 +43,26 @@ mapRegLit R12 = sr12
 mapRegLit R13 = sr13
 mapRegLit R14 = sr14
 mapRegLit R15 = sr15
+
+
+updateReg :: Register -> Symbolic SInt64 -> System -> System
+updateReg RAX v s = s {srax=v}
+updateReg RBX v s = s {srbx=v}
+updateReg RCX v s = s {srcx=v}
+updateReg RDX v s = s {srdx=v}
+updateReg RBP v s = s {srbp=v}
+updateReg RSI v s = s {srsi=v}
+updateReg RDI v s = s {srdi=v}
+updateReg RSP v s = s {srsp=v}
+updateReg R8  v s = s {sr8=v}
+updateReg R9  v s = s {sr9=v}
+updateReg R10 v s = s {sr10=v}
+updateReg R11 v s = s {sr11=v}
+updateReg R12 v s = s {sr12=v}
+updateReg R13 v s = s {sr13=v}
+updateReg R14 v s = s {sr14=v}
+updateReg R15 v s = s {sr15=v}
+
 
 data Size = B8L | B8H | B8 | B16 | B32 | B64 deriving (Data, Typeable, Show, Eq)
 
@@ -308,49 +328,3 @@ r13 = (RegLit R13 B64) bit64
 r14 = (RegLit R14 B64) bit64
 r15 = (RegLit R15 B64) bit64
 
---Crappy, but deriving is probably harder at this point
-{-
-pal = [p|(RegLit RAX B8L (True,False,False,False))|]
-pah = [p|(RegLit RAX B8H (True,False,False,False))|]
-pbl = [p|(RegLit RBX B8L (True,False,False,False))|]
-pbh = [p|(RegLit RBX B8H (True,False,False,False))|]
-pcl = [p|(RegLit RCX B8L (True,False,False,False))|]
-pch = [p|(RegLit RCX B8H (True,False,False,False))|]
-pdl = [p|(RegLit RDX B8L (True,False,False,False))|]
-pdh = [p|(RegLit RDX B8H (True,False,False,False))|]
-
-pax = [p|(RegLit RAX B16 (False,True,False,False))|]
-pbx = [p|(RegLit RBX B16 (False,True,False,False))|]
-pcx = [p|(RegLit RCX B16 (False,True,False,False))|]
-pdx = [p|(RegLit RDX B16 (False,True,False,False))|]
-pbp = [p|(RegLit RBP B16 (False,True,False,False))|]
-psi = [p|(RegLit RSI B16 (False,True,False,False))|]
-pdi = [p|(RegLit RDI B16 (False,True,False,False))|]
-psp = [p|(RegLit RSP B16 (False,True,False,False))|]
-
-peax = [p|(RegLit RAX B32 (False,False,True,False))|]
-pebx = [p|(RegLit RBX B32 (False,False,True,False))|]
-pecx = [p|(RegLit RCX B32 (False,False,True,False))|]
-pedx = [p|(RegLit RDX B32 (False,False,True,False))|]
-pebp = [p|(RegLit RBP B32 (False,False,True,False))|]
-pesi = [p|(RegLit RSI B32 (False,False,True,False))|]
-pedi = [p|(RegLit RDI B32 (False,False,True,False))|]
-pesp = [p|(RegLit RSP B32 (False,False,True,False))|]
-
-prax = [p|(RegLit RAX B64 (False,False,False,True))|]
-prbx = [p|(RegLit RBX B64 (False,False,False,True))|]
-prcx = [p|(RegLit RCX B64 (False,False,False,True))|]
-prdx = [p|(RegLit RDX B64 (False,False,False,True))|]
-prbp = [p|(RegLit RBP B64 (False,False,False,True))|]
-prsi = [p|(RegLit RSI B64 (False,False,False,True))|]
-prdi = [p|(RegLit RDI B64 (False,False,False,True))|]
-prsp = [p|(RegLit RSP B64 (False,False,False,True))|]
-pr8  = [p|(RegLit R8  B64 (False,False,False,True))|]
-pr9  = [p|(RegLit R9  B64 (False,False,False,True))|]
-pr10 = [p|(RegLit R10 B64 (False,False,False,True))|]
-pr11 = [p|(RegLit R11 B64 (False,False,False,True))|]
-pr12 = [p|(RegLit R12 B64 (False,False,False,True))|]
-pr13 = [p|(RegLit R13 B64 (False,False,False,True))|]
-pr14 = [p|(RegLit R14 B64 (False,False,False,True))|]
-pr15 = [p|(RegLit R15 B64 (False,False,False,True))|]
--}

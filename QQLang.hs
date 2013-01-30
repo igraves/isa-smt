@@ -49,7 +49,11 @@ operand' = do
               lbl <- opspeclabel
               return $ op lbl
 operand = do 
-            try (do reglit) <|> try (regmemspec) <|> try regspec  <|> immspec
+            try (specr8) <|> try (do reglit) <|> try (regmemspec) <|> try regspec  <|> immspec
+
+specr8 = do
+            symbol "r8"
+            return $ X86.Reg (True, False, False, False)
 
 popcode = do
             ident <- identifier
@@ -70,12 +74,8 @@ regspec = do
 
 immspec = do
             symbol "imm"
-            n <- natural
-            case (n) of
-                 8  -> return $ X86.Imm (True, False, False, False)
-                 16 -> return $ X86.Imm (False, True, False, False)
-                 32 -> return $ X86.Imm (False, False, True, False)
-                 _  -> fail "Invalid immediate width"
+            ns <- (try natural) `sepBy1` (symbol "/")
+            return $ X86.Reg (8 `elem` ns, 16 `elem` ns, 32 `elem` ns, 64 `elem` ns)
 
 opspeclabel = do
                 try (do
