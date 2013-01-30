@@ -172,7 +172,7 @@ data OpSpec =    RegLit Register Size Mask (Maybe Label)
 data RMDesc =  M Int
               | R Register deriving (Data, Typeable, Show, Eq)
 
-data Operand =  I Int Size Mask
+data Operand =  I Integer Mask
                | RegMem RMDesc Size Mask deriving (Data, Typeable, Show, Eq)
                 
 

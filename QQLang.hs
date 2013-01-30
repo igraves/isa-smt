@@ -88,17 +88,20 @@ instruction = do
                 ops <- op `sepBy` (symbol ",")
                 let ops'  = case (length ops) of
                                       0 -> X86.None
-                                      1 -> X86.OneOp $ rl2op $ head ops
-                                      2 -> X86.TwoOp (rl2op $ head ops) (rl2op $ head $ tail ops)
-                                      3 -> X86.ThreeOp (rl2op $ head ops) (rl2op $ head $ tail ops) (rl2op $ head $ tail $ tail ops) 
+                                      1 -> X86.OneOp $ head ops
+                                      2 -> X86.TwoOp (head ops) (head $ tail ops)
+                                      3 -> X86.ThreeOp (head ops) (head $ tail ops) (head $ tail $ tail ops) 
                                       _ -> error "Instruction specified with more than three operands"
                 return $ X86.Ins oc ops'
-    where
-      rl2op (X86.RegLit reg sz m _) = X86.RegMem (X86.R reg) sz m
 
 op = do
-        r <- reglit
-        return $ r Nothing
+        try (do r <- reglit
+                return $ rl2op $ r Nothing)
+        <|> do n <- natural
+               return $ X86.I n (n < 2^8, n < 2^16, n < 2^32, n < 2^64) 
+    where
+      rl2op (X86.RegLit reg sz m _) = X86.RegMem (X86.R reg) sz m
+               
 
 reglit = do            
                     try(do r <- symbol "al" ;return $ X86.regMap r) <|>
@@ -297,8 +300,12 @@ cosp (X86.RM m _) = TH.conP (TH.mkName "X86.RegMem")
 cosp (X86.Imm m _) = TH.conP (TH.mkName "X86.I")
                              [
                               TH.wildP, --(TH.mkName "addr"),
-                              maskx m
+                              maskimm m
                              ]
+    where 
+      maskimm (a,b,c,d) = TH.tupP [mflip a, mflip b, mflip c, mflip d]
+      mflip True = [p|True|]
+      mflip False = TH.wildP 
 
 cosps X86.None = TH.conP (TH.mkName "X86.None") []
 cosps (X86.OneOp x) = TH.conP (TH.mkName "X86.OneOp")
