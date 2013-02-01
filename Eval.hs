@@ -85,20 +85,36 @@ add o1 o2 = do
              (o1',o2') <- restwo o1 o2
              let o1'' = o1' + o2'
              putreg (prjreg o1) o1''
-             return ()
+
+mov :: X86.Operand -> X86.Operand -> Postcon ()
+mov o1 o2 = do
+             (o1', o2') <- restwo o1 o2
+             let o1'' = o2'
+             putreg (prjreg o1) o1''
+             
+
 
 --The add instruction specifications
-step [x86|add r/m8<o1>, r8<o2>|] = add o1 o2
-step [x86|add r/m16/32<o1>, r16/32<o2>|] = add o1 o2
-step [x86|add r8<o1>, r/m8<o2>|] = add o1 o2 
-step [x86|add r16/32<o1>, r/m16/32<o2>|] = add o1 o2 
-step [x86|add al<o1>, imm8<o2>|] = add o1 o2 
-step [x86|add ax<o1>, imm16<o2>|] = add o1 o2 
-step [x86|add eax<o1>, imm32<o2>|] = add o1 o2 
-step [x86|add r/m8<o1>, imm8<o2>|] = add o1 o2 
+step [x86|add r/m8<o1>, r8<o2>|]           = add o1 o2
+step [x86|add r/m16/32<o1>, r16/32<o2>|]   = add o1 o2
+step [x86|add r8<o1>, r/m8<o2>|]           = add o1 o2 
+step [x86|add r16/32<o1>, r/m16/32<o2>|]   = add o1 o2 
+step [x86|add al<o1>, imm8<o2>|]           = add o1 o2 
+step [x86|add ax<o1>, imm16<o2>|]          = add o1 o2 
+step [x86|add eax<o1>, imm32<o2>|]         = add o1 o2 
+step [x86|add r/m8<o1>, imm8<o2>|]         = add o1 o2 
 step [x86|add r/m16/32<o1>, imm16/32<o2>|] = add o1 o2 
-step [x86|add r/m8<o1>, imm8<o2>|] = add o1 o2 
-step [x86|add r/m16/32<o1>, imm8<o2>|] = add o1 o2 
+step [x86|add r/m8<o1>, imm8<o2>|]         = add o1 o2 
+step [x86|add r/m16/32<o1>, imm8<o2>|]     = add o1 o2 
+--The mov instruction specifications
+step [x86|mov r/m8<o1>, r8<o2>|]                 = mov o1 o2
+step [x86|mov r/m16/32/64<o1>, r16/32/64<o2>|]   = mov o1 o2
+step [x86|mov r8<o1>, r/m8<o2>|]           = mov o1 o2
+step [x86|mov r16/32/64<o1>, r/m16/32/64<o2>|] = mov o1 o2
+step [x86|mov r8<o1>, imm8<o2>|]           = mov o1 o2
+step [x86|mov r16/32/64<o1>, imm16/32/64<o2>|] = mov o1 o2
+step [x86|mov r/m8<o1>, imm8<o2>|]          = mov o1 o2
+step [x86|mov r/m16/32/64<o1>, imm16/32<o2>|] = mov o1 o2
 step x = error $ "Step can't resolve instruction: " ++ (show x)
 
 
@@ -108,8 +124,8 @@ evalins xs = do
                return ()
 
 
-test1 = [x86|add al, 1|] : [x86|add eax, eax|] : []
-test2 = [x86|add al, 1|] : [x86|add eax, eax|] : [] --[x86|add eax, eax|] : []
+test1 = [x86|mov eax, ebx|] : []
+test2 = [x86|add eax, 0|] : [x86|mov eax, ebx|] : [] --[x86|add eax, eax|] : []
 
 
 --runS :: Symbolic ()

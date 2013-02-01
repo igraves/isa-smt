@@ -75,7 +75,7 @@ regspec = do
 
 immspec = do
             symbol "imm"
-            ns <- trace "HOLLA" $ (try natural) `sepBy1` (symbol "/")
+            ns <- (try natural) `sepBy1` (symbol "/")
             return $ X86.Imm (8 `elem` ns, 16 `elem` ns, 32 `elem` ns, 64 `elem` ns)
 
 opspeclabel = do
@@ -351,7 +351,7 @@ quoteSpecPat s = do
                            fst (TH.loc_start loc),
                            snd (TH.loc_start loc))
                 pat <- parsePat pos s
-                dataToPatQ (const Nothing `extQ` compSpecPat) $ trace (show pat) $ pat
+                dataToPatQ (const Nothing `extQ` compSpecPat) pat
 
 
 quoteInsExpr :: String -> TH.ExpQ
