@@ -32,6 +32,12 @@ initial = do
             r13 <- sInt64 "r13"
             r14 <- sInt64 "r14"
             r15 <- sInt64 "r15"
+            sof <- sBool "of"
+            ssf <- sBool "sf"
+            szf <- sBool "zf"
+            saf <- sBool "af"
+            scf <- sBool "cf"
+            spf <- sBool "pf"
             return $ X86.System {
                            X86.srax = rax
                          , X86.srbx = rbx 
@@ -49,6 +55,12 @@ initial = do
                          , X86.sr13 = r13 
                          , X86.sr14 = r14 
                          , X86.sr15 = r15 
+                         , X86.sof = sof
+                         , X86.ssf = ssf
+                         , X86.szf = szf
+                         , X86.saf = saf
+                         , X86.scf = scf
+                         , X86.spf = spf
                      }
 
 
@@ -57,10 +69,18 @@ type Postcon = StateT X86.System Symbolic
 getreg r = do
               s <- get
               return $ mapRegLit r s
+getwithmask r sz = do
+                     val <- getreg r
+                     return $ val .&. (rmask sz)
 putreg r v = do
               s <- get
               let s' = updateReg r v s
               put s'
+
+putregm r v sz = do
+                    let v' = v .&. (rmask sz)
+                    putreg r v'
+
 --Operand resolution 
 restwo :: X86.Operand -> X86.Operand -> Postcon (SInt64, SInt64) 
 restwo (X86.RegMem (X86.R r) s _) (X86.I i _) = do
@@ -77,22 +97,65 @@ rmask X86.B8  = error "B8 cannot be used in this context."
 rmask X86.B16 = 0xFFFF
 rmask X86.B32 = 0xFFFFFFFF
 rmask X86.B64 = 0xFFFFFFFFFFFFFFFF
+
 prjreg (X86.RegMem (X86.R r) _ _) = r
+prjsz (X86.RegMem (X86.R _) s _) = s
+
+
+--Flag setting
+
+--overflow flag by a value and an operand size
+ovf v1 v2 sz = do
+                 s <- get
+                 put $ X86.fup X86.OF s ((v1 .> 0) &&& (v2 .> 0) &&& (v1 + v2 .< 0) |||
+                                         (v1 .< 0) &&& (v2 .< 0) &&& (v1 + v2 .> 0))
+sf v sz = do
+               s <- get
+               put $ X86.fup X86.SF s (v .< 0)
+zf v sz = do
+               s <- get
+               put $ X86.fup X86.ZF s (v .== 0)
+cf v sz = do
+               s <- get
+               put $ X86.fup X86.CF s (v .> ((rmask sz) `shiftR` 1))
+--clear/set flags
+clear f = do
+               s <- get
+               put $ X86.fup f s (false)
+set f = do
+               s <-get
+               put $ X86.fup f s (true)
+--ignoring the af flag
+--ignoring the pf flag
+            
+        
 
 --The add instruction
 add :: X86.Operand -> X86.Operand -> Postcon ()
 add o1 o2 = do
              (o1',o2') <- restwo o1 o2
              let o1'' = o1' + o2'
-             putreg (prjreg o1) o1''
+             putregm (prjreg o1) o1'' (prjsz o1)
+             ovf o1' o2' (prjsz o1)
+             sf o1'' (prjsz o1)
+             zf o1'' (prjsz o1)
+             cf o1'' (prjsz o1)
 
 mov :: X86.Operand -> X86.Operand -> Postcon ()
 mov o1 o2 = do
              (o1', o2') <- restwo o1 o2
              let o1'' = o2'
-             putreg (prjreg o1) o1''
-             
+             putregm (prjreg o1) o1'' (prjsz o1)
 
+xor' :: X86.Operand -> X86.Operand -> Postcon ()
+xor' o1 o2 = do
+               (o1', o2') <- restwo o1 o2
+               let o1'' = o1' `Data.SBV.xor` o2'
+               putregm (prjreg o1) o1'' (prjsz o1)
+               clear X86.OF
+               clear X86.CF
+               sf o1'' (prjsz o1)
+               zf o1'' (prjsz o1)
 
 --The add instruction specifications
 step [x86|add r/m8<o1>, r8<o2>|]           = add o1 o2
@@ -106,15 +169,29 @@ step [x86|add r/m8<o1>, imm8<o2>|]         = add o1 o2
 step [x86|add r/m16/32<o1>, imm16/32<o2>|] = add o1 o2 
 step [x86|add r/m8<o1>, imm8<o2>|]         = add o1 o2 
 step [x86|add r/m16/32<o1>, imm8<o2>|]     = add o1 o2 
+
 --The mov instruction specifications
 step [x86|mov r/m8<o1>, r8<o2>|]                 = mov o1 o2
 step [x86|mov r/m16/32/64<o1>, r16/32/64<o2>|]   = mov o1 o2
-step [x86|mov r8<o1>, r/m8<o2>|]           = mov o1 o2
-step [x86|mov r16/32/64<o1>, r/m16/32/64<o2>|] = mov o1 o2
-step [x86|mov r8<o1>, imm8<o2>|]           = mov o1 o2
-step [x86|mov r16/32/64<o1>, imm16/32/64<o2>|] = mov o1 o2
-step [x86|mov r/m8<o1>, imm8<o2>|]          = mov o1 o2
-step [x86|mov r/m16/32/64<o1>, imm16/32<o2>|] = mov o1 o2
+step [x86|mov r8<o1>, r/m8<o2>|]                 = mov o1 o2
+step [x86|mov r16/32/64<o1>, r/m16/32/64<o2>|]   = mov o1 o2
+step [x86|mov r8<o1>, imm8<o2>|]                 = mov o1 o2
+step [x86|mov r16/32/64<o1>, imm16/32/64<o2>|]   = mov o1 o2
+step [x86|mov r/m8<o1>, imm8<o2>|]               = mov o1 o2
+step [x86|mov r/m16/32/64<o1>, imm16/32<o2>|]    = mov o1 o2
+
+--The xor instruction specifications
+step [x86|xor r/m8<o1>, r8<o2>|]                = xor' o1 o2
+step [x86|xor r/m16/32/64<o1>, r16/32/64<o2> |] = xor' o1 o2
+step [x86|xor r8<o1>, r/m8<o2>|]                = xor' o1 o2
+step [x86|xor r16/32/64<o1>, r/m16/32/64<o2>|]  = xor' o1 o2
+step [x86|xor al<o1>, imm8<o2>|]                = xor' o1 o2
+step [x86|xor ax<o1>, imm16<o2>|]               = xor' o1 o2
+step [x86|xor eax<o1>, imm32<o2>|]              = xor' o1 o2
+step [x86|xor r/m8<o1>, imm8<o2>|]              = xor' o1 o2
+step [x86|xor r/m16/32/64<o1>, imm16/32<o2>|]   = xor' o1 o2
+step [x86|xor r/m16/32/64<o1>, imm8<o2>|]       = xor' o1 o2
+
 step x = error $ "Step can't resolve instruction: " ++ (show x)
 
 
@@ -124,26 +201,21 @@ evalins xs = do
                return ()
 
 
-test1 = [x86|mov eax, ebx|] : []
-test2 = [x86|add eax, 0|] : [x86|mov eax, ebx|] : [] --[x86|add eax, eax|] : []
+test1 = [x86|mov eax, 0|] : [x86|add eax, 1|] : []
+test2 = [x86|xor eax, eax|] : [x86|add eax, 1|] : [] --[x86|add eax, eax|] : []
 
 
 --runS :: Symbolic ()
-runS = do
+runS reg = do
              i <- initial
              r <- execStateT (evalins test1) i
              s <- execStateT (evalins test2) i
-             return $ (X86.srax r) .== (X86.srax s)
+             cmpstate reg r s
 
-             {-
-             return $ [
-                          (X86.srax r) .== (X86.srax s)
-                        , (X86.srbx r) .== (X86.srbx s)
-                        , (X86.srcx r) .== (X86.srcx s)
-                        , (X86.srdx r) .== (X86.srdx s)
-                        , (X86.srbp r) .== (X86.srbp s)
-                        , (X86.srsi r) .== (X86.srsi s)
-                        , (X86.srdi r) .== (X86.srdi s)
-                        , (X86.srsp r) .== (X86.srsp s)]-}
+cmpstate :: X86.OpSpec -> X86.System -> X86.System -> Symbolic SBool
+cmpstate (X86.RegLit r sz _ _) s1 s2 = return $ ((X86.mapRegLit r) s1) .&. (rmask sz) .== ((X86.mapRegLit r) s2) .&. (rmask sz)
 
 
+
+main = do
+          mapM (\x -> prove $ runS x) X86.registers

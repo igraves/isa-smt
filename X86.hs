@@ -24,7 +24,17 @@ data System = System {
                         , sr13 :: SInt64
                         , sr14 :: SInt64
                         , sr15 :: SInt64
+                        , sof  :: SBool
+                        , ssf  :: SBool
+                        , szf  :: SBool
+                        , saf  :: SBool
+                        , scf  :: SBool
+                        , spf  :: SBool
                     }
+
+
+
+
 
 mapRegLit :: Register -> (System -> SInt64)
 mapRegLit RAX = srax
@@ -90,6 +100,20 @@ data Register = RAX
                 | R13
                 | R14
                 | R15 deriving (Data, Typeable, Show, Eq)
+
+data Flag =   OF
+            | SF
+            | ZF
+            | AF
+            | CF
+            | PF deriving (Data, Typeable, Show, Eq)
+
+fup OF sys = \x -> sys{sof=x}
+fup SF sys = \x -> sys{ssf=x}
+fup ZF sys = \x -> sys{szf=x}
+fup AF sys = \x -> sys{saf=x}
+fup CF sys = \x -> sys{scf=x}
+fup PF sys = \x -> sys{spf=x}
 
 instance THS.Lift Register where
           lift RAX = [|RAX|]
@@ -328,3 +352,9 @@ r13 = (RegLit R13 B64) bit64
 r14 = (RegLit R14 B64) bit64
 r15 = (RegLit R15 B64) bit64
 
+
+
+
+registers = map (\x -> x Nothing) [al, ah, bl, bh, cl, ch, dl, dh, ax, bx, cx, dx, bp, si, di, sp, 
+             eax, ebx, ecx, edx, ebp, esi, edi, esp, rax, rbx, rcx, rdx, rbp, 
+             rsi, rdi, rsp, r8 , r9 , r10, r11, r12, r13, r14, r15]
