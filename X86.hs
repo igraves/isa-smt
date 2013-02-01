@@ -26,7 +26,7 @@ data System = System {
                         , sr15 :: SInt64
                     }
 
-mapRegLit :: Register -> (System -> Symbolic SInt64)
+mapRegLit :: Register -> (System -> SInt64)
 mapRegLit RAX = srax
 mapRegLit RBX = srbx
 mapRegLit RCX = srcx
@@ -45,7 +45,7 @@ mapRegLit R14 = sr14
 mapRegLit R15 = sr15
 
 
-updateReg :: Register -> Symbolic SInt64 -> System -> System
+updateReg :: Register -> SInt64 -> System -> System
 updateReg RAX v s = s {srax=v}
 updateReg RBX v s = s {srbx=v}
 updateReg RCX v s = s {srcx=v}

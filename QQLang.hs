@@ -8,6 +8,7 @@ import qualified X86 as X86
 import Data.Generics
 import qualified Language.Haskell.TH as TH
 import Language.Haskell.TH.Quote
+import Debug.Trace
 
 
 
@@ -74,8 +75,8 @@ regspec = do
 
 immspec = do
             symbol "imm"
-            ns <- (try natural) `sepBy1` (symbol "/")
-            return $ X86.Reg (8 `elem` ns, 16 `elem` ns, 32 `elem` ns, 64 `elem` ns)
+            ns <- trace "HOLLA" $ (try natural) `sepBy1` (symbol "/")
+            return $ X86.Imm (8 `elem` ns, 16 `elem` ns, 32 `elem` ns, 64 `elem` ns)
 
 opspeclabel = do
                 try (do
@@ -307,6 +308,7 @@ cosp (X86.Imm m _) = TH.conP (TH.mkName "X86.I")
       mflip True = [p|True|]
       mflip False = TH.wildP 
 
+
 cosps X86.None = TH.conP (TH.mkName "X86.None") []
 cosps (X86.OneOp x) = TH.conP (TH.mkName "X86.OneOp")
                               [
@@ -342,22 +344,6 @@ compSpecPat (X86.InsSpec oc ops) = Just $ do
                                                         cosps ops
                                                       ] 
 
-
-
-
-compSpecExpr :: X86.InsSpec -> Maybe (TH.Q TH.Exp)
-compSpecExpr (X86.InsSpec x X86.None) = Just $ TH.appE (TH.appE (TH.conE (TH.mkName "X86.Ins"))
-                                                                (toExpQ x))
-                                                       (TH.conE (TH.mkName "X86.None"))
-compSpecExpr (X86.InsSpec oc ops)     = Just $ TH.appsE 
-                                                    [
-                                                        TH.conE $ TH.mkName "X86.Ins"
-                                                      , toExpQ oc 
-                                                      --, cose ops
-                                                    ]
-                                              
-
-
 quoteSpecPat :: String -> TH.PatQ
 quoteSpecPat s = do 
                 loc <- TH.location
@@ -365,7 +351,7 @@ quoteSpecPat s = do
                            fst (TH.loc_start loc),
                            snd (TH.loc_start loc))
                 pat <- parsePat pos s
-                dataToPatQ (const Nothing `extQ` compSpecPat) pat
+                dataToPatQ (const Nothing `extQ` compSpecPat) $ trace (show pat) $ pat
 
 
 quoteInsExpr :: String -> TH.ExpQ
@@ -375,7 +361,7 @@ quoteInsExpr s = do
                            fst (TH.loc_start loc),
                            snd (TH.loc_start loc))
                 pat <- parseExpr pos s
-                dataToExpQ (const Nothing `extQ` compSpecExpr) pat
+                dataToExpQ (const Nothing) pat
                 
                 
 
