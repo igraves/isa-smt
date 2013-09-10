@@ -5,7 +5,8 @@ import qualified X86 as X86
 import qualified Language.Haskell.TH as TH
 import Control.Monad.Trans.State
 import Control.Monad.IO.Class
-import Data.SBV
+--import Data.SBV
+import Data.SBV.Bridge.Yices
 
 --Rename imports
 mapRegLit = X86.mapRegLit
@@ -150,7 +151,7 @@ mov o1 o2 = do
 xor' :: X86.Operand -> X86.Operand -> Postcon ()
 xor' o1 o2 = do
                (o1', o2') <- restwo o1 o2
-               let o1'' = o1' `Data.SBV.xor` o2'
+               let o1'' = o1' `Data.SBV.Bridge.Yices.xor` o2'
                putregm (prjreg o1) o1'' (prjsz o1)
                clear X86.OF
                clear X86.CF
